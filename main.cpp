@@ -67,6 +67,15 @@ void test_add() {
   delete[] string;
 
   printf("uli + uli2 = %s\n", (uli + uli2).ToString());
+
+  puts("\nTEST ADD NUM");
+  ULI uli0(123, 10);
+
+  string = uli0.ToString();
+  printf("uli = %s\n", string);
+  delete[] string;
+
+  printf("uli + 2 = %s\n", (uli0 + 2).ToString());
 }
 
 void test_minus() {
@@ -203,16 +212,28 @@ void test_power_mod() {
   printf("uli^power %% mod = %s\n", string);
 }
 
-void test_rand() {
-  puts("\nTEST RAND");
+// void test_rand() {
+//   puts("\nTEST RAND");
+//   char *string;
+
+//   string = ULI::rand(10).ToString();
+//   printf("rand() = %s\n", string);
+// }
+
+void test_lemena() {
+  puts("\nTEST LEMERA");
+
+  ULI uli("100001", 6, 10); 
   char *string;
 
-  string = ULI::rand(10).ToString();
-  printf("rand() = %s\n", string);
+  string = uli.ToString();
+  printf("uli = %s\n", string);
+  delete [] string;
+  printf("uli is primary = %d\n", uli.IsPrimary());  
 }
 
-void test_Lemena() {
-  puts("\nTEST LEMERA");
+void test_miller_rabina() {
+  puts("\nTEST MILLERA RABINA");
 
   ULI uli("100003", 6, 10); 
   char *string;
@@ -220,7 +241,7 @@ void test_Lemena() {
   string = uli.ToString();
   printf("uli = %s\n", string);
   delete [] string;
-  printf("uli is primary = %d\n", uli.IsPrimary());  
+  printf("uli is primary = %d\n", uli.IsPrimary(2));  
 }
 
 int main() {
@@ -237,8 +258,9 @@ int main() {
     test_div();
     test_karatsuba();
     test_power_mod();
-    test_rand();
-    test_Lemena();
+    // test_rand();
+    test_lemena();
+    test_miller_rabina();
   } catch (const char *mess) {
     printf("%s\n", mess);
     return 1;

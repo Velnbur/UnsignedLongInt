@@ -43,7 +43,9 @@ BitArr::BitArr(const BitArr &a)
 
 BitArr &BitArr::operator=(const BitArr &a)
 {
-    delete[] arr;
+    if(this == &a)
+        return *this; 
+    delete [] arr;
     arr_size = a.arr_size;
     len = a.len;
     last_used = a.last_used;

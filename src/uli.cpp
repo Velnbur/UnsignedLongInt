@@ -9,10 +9,6 @@
 
 #define DEFAULT_ARR_SIZE 64
 
-enum PRIMARY_METHODS {
-    LEMENA = 1,
-};
-
 ULI::ULI()
     :base(2)
 {
@@ -173,6 +169,11 @@ ULI ULI::operator+(const ULI &b) const
     return result;
 }
 
+ULI ULI::operator+(unsigned int num) const
+{
+    return (*this) + ULI(num, base);
+}
+
 ULI ULI::operator-(const ULI &b) const
 {
     if (b >= *this)
@@ -284,6 +285,8 @@ ULI ULI::operator<<(unsigned int bits) const
 
 ULI &ULI::operator=(const ULI &b)
 {
+    if(this == &b)
+        return (*this);
     *arr = *(b.arr);
     base = b.base;
     return *this;
@@ -309,6 +312,11 @@ bool ULI::operator<(const ULI &b) const
     return !(*this >= b);
 }
 
+bool ULI::operator<(unsigned num) const
+{
+    return !(*this >= ULI(num, base));
+}
+
 bool ULI::operator>(unsigned num) const
 {
     return *this > ULI(num, 10);
@@ -327,6 +335,26 @@ bool ULI::operator>=(const ULI &b) const
             return false;
     }
     return true;
+} 
+
+bool ULI::operator<=(const ULI &b) const
+{
+    if (arr->Len() != b.arr->Len())
+        return arr->Len() < b.arr->Len();
+
+    for (int i = arr->Len() - 1; i >= 0; --i)
+    {
+        if (arr->Get(i) < b.arr->Get(i))
+            return true;
+        else if (arr->Get(i) > b.arr->Get(i))
+            return false;
+    }
+    return true;
+} 
+
+bool ULI::operator<=(unsigned int num) const
+{
+    return (*this) <= ULI(num, base);
 }
 
 bool ULI::operator==(const ULI &b) const
@@ -350,6 +378,11 @@ bool ULI::operator==(unsigned num) const
 bool ULI::operator!=(unsigned num) const
 {
     return !(*this == ULI(num, base));
+}
+
+bool ULI::operator!=(const ULI &b) const
+{
+    return !(*this == b);
 }
 
 void ULI::DivAndMod(const ULI &b, ULI &div, ULI &mod) const
@@ -421,15 +454,14 @@ void ULI::SliceByHalfs(ULI &a_l, ULI &a_r, unsigned n) const
 ULI ULI::power_mod(const ULI &a, const ULI &power, const ULI &mod)
 {
     ULI result(1, a.base);
-    ULI *array = new ULI[power.arr->Len()];
+    size_t len = power.arr->Len()+1;
+    ULI *array = new ULI[len];
 
     array[0] = a;
-    for(unsigned i = 1; i < a.arr->Len(); ++i)
+    for(unsigned i = 1; i < len; ++i)
         array[i] = (array[i-1] * array[i-1]) % mod;
 
-    
-
-    for(unsigned i = 0; i < a.arr->Len(); ++i)
+    for(unsigned i = 0; i < len; ++i)
         if(power.arr->Get(i))
             result = result * array[i];
 
@@ -437,14 +469,19 @@ ULI ULI::power_mod(const ULI &a, const ULI &power, const ULI &mod)
     return result % mod;
 }
 
-ULI ULI::rand(unsigned base) 
-{
-    ULI result(time(0), base);
-    const int a = 17;
-    const int c = 19;
-    result = result * a + c;
-    return result;
-}
+// ULI ULI::rand(unsigned base)
+// {
+//     ULI result(time(0), base);
+//     const int a = 17;
+//     const int c = 19;
+//     result = result * a + c;
+//     return result;
+//}
+
+enum PRIMARY_METHODS {
+    LEMENA = 1,
+    MILLERA_RABINA = 2,
+};
 
 bool ULI::IsPrimary(unsigned int method) const
 {
@@ -454,6 +491,8 @@ bool ULI::IsPrimary(unsigned int method) const
     switch((PRIMARY_METHODS)method) {
         case LEMENA:
             return Lemena();
+        case MILLERA_RABINA:
+            return RabinMiller();
     }
     return false;
 }
@@ -461,19 +500,64 @@ bool ULI::IsPrimary(unsigned int method) const
 bool ULI::Lemena() const
 {
     const unsigned T = 10;
-    unsigned count = 0;
+
+    if((*this) != 2 && IsEven())
+        return false;
+
+    srand((unsigned)time(NULL));
 
     for(unsigned i = 0; i < T; ++i) {
-        ULI a = ULI::rand(base) % (*this);
+        ULI a = ULI(rand(), base) % ((*this)-1) + 2;
         ULI power = ((*this)-1) >> 1;
+
         ULI tmp = ULI::power_mod(a, power, (*this));
 
-        if(tmp != 1)
+        if(tmp != 1 && tmp != (*this)-1)
             return false;
-        ++count;
+        else if(tmp == 1 || tmp == ((*this)-1)%(*this))
+            return true;
     }
 
-    if(count < T/2)
-        return false;
     return true;
+}
+
+bool ULI::RabinMiller() const
+{
+    if(*this < 3)
+        return true;
+    if(IsEven())
+        return false;
+
+    ULI r = *this;
+    ULI count(0, base);
+    srand((unsigned)time(NULL)); // TODO
+
+    for(;;) {
+        r = r >> 1;
+        if(!r.IsEven())
+            break;
+        count = count + 1;
+    }
+
+    const unsigned t = 8;
+    for(unsigned i = 0; i <= t; ++i) {
+        ULI a = ULI(rand(), base) % ((*this)-1) + 2; // TODO
+        ULI y = power_mod(a, r, (*this));
+
+        if(y != 1 && y != (*this)-1) {
+            for(unsigned j = 0; j <= count-1; ++j) {
+                y = power_mod(y, ULI(2, base), (*this));
+                if(y == 1)
+                    return false;
+            }
+            if(y != (*this)-1)
+                return false;
+        }
+    }
+    return true;
+}
+
+bool operator<=(unsigned num, const ULI &b)
+{
+    return !(b > num);
 }
