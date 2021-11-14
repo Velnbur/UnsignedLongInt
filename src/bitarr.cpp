@@ -1,6 +1,5 @@
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
+#include <cstring>
+#include <cstdio>
 
 #include "bitarr.h"
 
@@ -61,32 +60,33 @@ char BitArr::Get(unsigned i)
 {
     unsigned bit = i % 8;
     char tmp = arr[i / 8];
-    char result = 0;
-    switch (bit)
-    {
-    case 0:
-        result = tmp & BIT_0;
-        break;
-    case 1:
-        result = tmp & BIT_1;
-        break;
-    case 2:
-        result = tmp & BIT_2;
-        break;
-    case 3:
-        result = tmp & BIT_3;
-        break;
-    case 4:
-        result = tmp & BIT_4;
-        break;
-    case 5:
-        result = tmp & BIT_5;
-        break;
-    case 6:
-        result = tmp & BIT_6;
-        break;
-    case 7:
-        result = tmp & BIT_7;
+    int result = 0;
+    switch (bit) {
+        case 0:
+            result = tmp & BIT_0;
+            break;
+        case 1:
+            result = tmp & BIT_1;
+            break;
+        case 2:
+            result = tmp & BIT_2;
+            break;
+        case 3:
+            result = tmp & BIT_3;
+            break;
+        case 4:
+            result = tmp & BIT_4;
+            break;
+        case 5:
+            result = tmp & BIT_5;
+            break;
+        case 6:
+            result = tmp & BIT_6;
+            break;
+        case 7:
+            result = tmp & BIT_7;
+        default:
+            break;
     }
     if (result)
         return 1;
@@ -107,32 +107,33 @@ void BitArr::Set(unsigned i, char value)
         value = 255;
     else
         value = 0;
-    switch (bit)
-    {
-    case 0:
-        arr[i / 8] |= BIT_0 & value;
-        break;
-    case 1:
-        arr[i / 8] |= BIT_1 & value;
-        break;
-    case 2:
-        arr[i / 8] |= BIT_2 & value;
-        break;
-    case 3:
-        arr[i / 8] |= BIT_3 & value;
-        break;
-    case 4:
-        arr[i / 8] |= BIT_4 & value;
-        break;
-    case 5:
-        arr[i / 8] |= BIT_5 & value;
-        break;
-    case 6:
-        arr[i / 8] |= BIT_6 & value;
-        break;
-    case 7:
-        arr[i / 8] |= BIT_7 & value;
-        break;
+    switch (bit) {
+        case 0:
+            arr[i / 8] |= BIT_0 & value;
+            break;
+        case 1:
+            arr[i / 8] |= BIT_1 & value;
+            break;
+        case 2:
+            arr[i / 8] |= BIT_2 & value;
+            break;
+        case 3:
+            arr[i / 8] |= BIT_3 & value;
+            break;
+        case 4:
+            arr[i / 8] |= BIT_4 & value;
+            break;
+        case 5:
+            arr[i / 8] |= BIT_5 & value;
+            break;
+        case 6:
+            arr[i / 8] |= BIT_6 & value;
+            break;
+        case 7:
+            arr[i / 8] |= BIT_7 & value;
+            break;
+        default:
+            break;
     }
 }
 
@@ -152,7 +153,7 @@ void BitArr::Resize(size_t _size)
     len = arr_size * 8;
 }
 
-size_t BitArr::Len()
+size_t BitArr::Len() const
 {
     return last_used;
 }
@@ -162,21 +163,21 @@ void BitArr::PushBack(int value)
     Set(last_used++, value);
 }
 
-static bool is_empty(int *a, int len)
+bool BitArr::is_empty(const unsigned *a, size_t len)
 {
-    for (int i = 0; i < len; ++i)
+    for (size_t i = 0; i < len; ++i)
         if (a[i] != 0)
             return false;
     return true;
 }
 
-void BitArr::FromLongNum(int *long_num, size_t len, unsigned base)
+void BitArr::FromLongNum(unsigned *long_num, size_t _len, unsigned base)
 {
     Erase();
 
     size_t i = 0, cf = 0, t;
-    while (!is_empty(long_num, len)) {
-        while (i < len) {
+    while (!BitArr::is_empty(long_num, _len)) {
+        while (i < _len) {
             t = long_num[i] + cf * base;
             long_num[i] = t / 2;
             cf = t % 2;
@@ -203,13 +204,13 @@ void BitArr::RecountDigits()
 
 void BitArr::RevertBits()
 {
-    int len = Len();
-    char *tmp = new char[len];
-    for(int i = 0; i < len; ++i)
+    size_t _len = Len();
+    char *tmp = new char[_len];
+    for(size_t i = 0; i < _len; ++i)
         tmp[i] = Get(i);
     Erase();
-    for(int i = len-1; i >= 0; --i)
-        PushBack(tmp[i]);
+    for(size_t i = _len; i > 0; --i)
+        PushBack(tmp[i-1]);
 
     delete[] tmp;
 }

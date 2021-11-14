@@ -1,37 +1,36 @@
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <strings.h>
-#include <string.h>
-#include <time.h>
+#include <cstring>
+#include <ctime>
 
 #include "uli.h"
 
 #define DEFAULT_ARR_SIZE 64
 
 ULI::ULI()
-    :base(2)
+    : base(2)
 {
     arr = new BitArr(DEFAULT_ARR_SIZE);
 }
 
 ULI::~ULI()
 {
-    if (arr)
-        delete arr;
+    delete arr;
 }
 
-ULI::ULI(unsigned int _base)
+ULI::ULI(unsigned _base)
     : base(_base)
 {
     arr = new BitArr(DEFAULT_ARR_SIZE);
 }
 
-ULI::ULI(unsigned int num, unsigned int base)
+ULI::ULI(unsigned int num, unsigned base)
     : base(base)
 {
     arr = new BitArr(DEFAULT_ARR_SIZE);
-    do {
+    do
+    {
         arr->PushBack(num % 2);
         num >>= 1;
     } while (num);
@@ -44,7 +43,7 @@ ULI::ULI(const ULI &a)
     base = a.base;
 }
 
-ULI::ULI(const char *str, size_t _len, unsigned int _base)
+ULI::ULI(const char *str, size_t _len, unsigned _base)
     : base(_base)
 {
     arr = new BitArr(DEFAULT_ARR_SIZE);
@@ -55,10 +54,12 @@ ULI::ULI(const char *str, size_t _len, unsigned int _base)
     this->ParseString(str, _len);
 }
 
-int ULI::len_from_digits(unsigned int digits, unsigned int base)
+unsigned int
+ULI::len_from_digits(unsigned digits, unsigned base)
 {
     int count = 0;
-    do {
+    do
+    {
         ++count;
         base >>= 1;
     } while (base);
@@ -86,27 +87,38 @@ char *ULI::strrev(char *str)
 
 char *ULI::ToString(char *str, size_t _len) const
 {
-    int len = arr->Len();
-    int tmp_len = len_from_digits(len, base) + 1;
+    size_t len = arr->Len();
+    unsigned tmp_len = len_from_digits(len, base) + 1;
     char *result = new char[tmp_len];
-    for (int i = 0; i < tmp_len; ++i)
+    for (unsigned i = 0; i < tmp_len; ++i)
         result[i] = 0;
     int used = 1;
 
-    for (int i = len - 1; i >= 0; --i) {
-        for (int j = used - 1; j >= 0; --j) {
+    for (size_t i = len; i > 0; --i)
+    {
+        // multiply every digit by 2
+        for (int j = used; j >= 0; --j)
+        {
             result[j] *= 2;
-            if (result[j] >= base) {
+        }
+        // if digit > base, mod it by base
+        // and raise next digit
+        for (int j = 0; j < used; ++j)
+        {
+            if ((unsigned)result[j] >= base)
+            {
                 if (used <= j + 1)
                     ++used;
                 result[j + 1] += result[j] / base;
                 result[j] %= base;
             }
         }
-        result[0] += arr->Get(i);
+        result[0] += arr->Get(i - 1);
     }
 
-    for (int j = 0; j < used; ++j) {
+    // make array of digits to array of chars
+    for (int j = 0; j < used; ++j)
+    {
         if (result[j] < 10)
             result[j] += '0';
         else
@@ -125,26 +137,29 @@ bool ULI::IsEven() const
 
 void ULI::ParseString(const char *str, size_t _len)
 {
-    int *nums = new int[_len];
+    auto *nums = new unsigned[_len];
 
     if (base <= 10)
-        for (unsigned i = 0; i < _len; ++i) {
-            if (str[i] <= ('0' + base - 1) && str[i] >= '0')
+        for (unsigned i = 0; i < _len; ++i)
+        {
+            if ((unsigned)str[i] <= ('0' + base - 1) && str[i] >= '0')
                 nums[i] = str[i] - '0';
             else
                 throw "Invalid string";
         }
     else
-        for (unsigned i = 0; i < _len; ++i) {
+        for (unsigned i = 0; i < _len; ++i)
+        {
             if (str[i] <= '9' && str[i] >= '0')
                 nums[i] = str[i] - '0';
-            else if (str[i] <= ('A' + base - 11) && str[i] >= 'A')
+            else if ((unsigned)str[i] <= ('A' + base - 11) && str[i] >= 'A')
                 nums[i] = str[i] - 'A' + 10;
-            else if (str[i] <= ('a' + base - 11) && str[i] >= 'a')
-                nums[i] = str[i] - 'A' + 10;
+            else if ((unsigned)str[i] <= ('a' + base - 11) && str[i] >= 'a')
+                nums[i] = str[i] - 'a' + 10;
             else
                 throw "Invalid string";
         }
+
     arr->FromLongNum(nums, _len, base);
     delete[] nums;
 }
@@ -152,15 +167,19 @@ void ULI::ParseString(const char *str, size_t _len)
 ULI ULI::operator+(const ULI &b) const
 {
     int cf = 0;
-    int max = arr->Len() > b.arr->Len() ? arr->Len() : b.arr->Len();
+    size_t max = arr->Len() > b.arr->Len() ? arr->Len() : b.arr->Len();
     ULI result(base);
 
-    for (int i = 0; i < max || cf != 0; ++i) {
+    for (size_t i = 0; i < max || cf != 0; ++i)
+    {
         int tmp = arr->Get(i) + b.arr->Get(i) + cf;
-        if (2 <= tmp) {
+        if (2 <= tmp)
+        {
             result.arr->PushBack(tmp - 2);
             cf = 1;
-        } else {
+        }
+        else
+        {
             result.arr->PushBack(tmp);
             cf = 0;
         }
@@ -177,18 +196,22 @@ ULI ULI::operator+(unsigned int num) const
 ULI ULI::operator-(const ULI &b) const
 {
     if (b >= *this)
-        return ULI(0, base);
+        return {0, base};
 
     int cf = 0;
     int max = arr->Len();
     ULI result(base);
 
-    for (int i = 0; i < max || cf != 0; ++i) {
+    for (int i = 0; i < max || cf != 0; ++i)
+    {
         int tmp = b.arr->Get(i) + cf;
-        if (arr->Get(i) < tmp) {
+        if (arr->Get(i) < tmp)
+        {
             result.arr->PushBack(2 + arr->Get(i) - tmp);
             cf = 1;
-        } else {
+        }
+        else
+        {
             result.arr->PushBack(arr->Get(i) - tmp);
             cf = 0;
         }
@@ -204,8 +227,8 @@ ULI ULI::operator-(unsigned int num) const
 
 ULI ULI::operator*(const ULI &another) const
 {
-    if(another.arr->Len() > 10 &&
-        arr->Len() > 10)
+    if (another.arr->Len() >= 40 &&
+        arr->Len() >= 40)
     {
         return Karatsuba(another);
     }
@@ -213,20 +236,28 @@ ULI ULI::operator*(const ULI &another) const
     ULI result(base);
     const ULI *tmp1, *tmp2;
 
-    if (*this > another) {
+    if (*this > another)
+    {
         tmp1 = this;
         tmp2 = &another;
-    } else {
+    }
+    else
+    {
         tmp1 = &another;
         tmp2 = this;
     }
     ULI a = *tmp1, b = *tmp2;
 
-    while (b > 0) {
-        if (b.IsEven()) {
+    while (b > 0)
+    {
+        if (b.IsEven())
+        {
             a = a << 1;
             b = b >> 1;
-        } else {;
+        }
+        else
+        {
+            ;
             b = b - 1;
             result = result + a;
         }
@@ -242,6 +273,10 @@ ULI ULI::operator*(unsigned int num) const
 ULI ULI::operator/(const ULI &b) const
 {
     // div = a / b
+    if (b > (*this))
+        return {0, base};
+    if (b == (*this))
+        return {1, base};
     ULI div(base);
     ULI mod(base);
     DivAndMod(b, div, mod);
@@ -251,6 +286,8 @@ ULI ULI::operator/(const ULI &b) const
 ULI ULI::operator%(const ULI &b) const
 {
     // mod = a % b
+    if (b > (*this))
+        return (*this);
     ULI div(base);
     ULI mod(base);
     DivAndMod(b, div, mod);
@@ -260,12 +297,12 @@ ULI ULI::operator%(const ULI &b) const
 ULI ULI::operator>>(unsigned int bits) const
 {
     if (bits > arr->Len())
-        return ULI(0, base);
+        return {0, base};
 
     ULI result(base);
-    int len = arr->Len();
+    size_t len = arr->Len();
 
-    for (int i = bits; i < len; ++i)
+    for (unsigned i = bits; i < len; ++i)
         result.arr->PushBack(arr->Get(i));
 
     return result;
@@ -285,7 +322,7 @@ ULI ULI::operator<<(unsigned int bits) const
 
 ULI &ULI::operator=(const ULI &b)
 {
-    if(this == &b)
+    if (this == &b)
         return (*this);
     *arr = *(b.arr);
     base = b.base;
@@ -335,7 +372,7 @@ bool ULI::operator>=(const ULI &b) const
             return false;
     }
     return true;
-} 
+}
 
 bool ULI::operator<=(const ULI &b) const
 {
@@ -350,7 +387,7 @@ bool ULI::operator<=(const ULI &b) const
             return false;
     }
     return true;
-} 
+}
 
 bool ULI::operator<=(unsigned int num) const
 {
@@ -390,7 +427,7 @@ void ULI::DivAndMod(const ULI &b, ULI &div, ULI &mod) const
     // div = a / b
     // mod = a % b
     mod = *this;
-    int sh = arr->Len() - b.arr->Len();
+    unsigned int sh = arr->Len() - b.arr->Len();
 
     while (mod >= b)
     {
@@ -409,6 +446,7 @@ void ULI::DivAndMod(const ULI &b, ULI &div, ULI &mod) const
             for (; sh > 0; --sh)
                 div.arr->PushBack(0);
         --sh;
+        //printf("%s\n", div.ToString());
     }
     div.arr->RevertBits();
 }
@@ -422,7 +460,7 @@ ULI ULI::Karatsuba(const ULI &b) const
 
     if (max <= 4)
         return (*this) * b;
-    if (max & 1)
+    if (max & 1) // if is odd
         ++max;
 
     ULI a_l(base), a_r(base);
@@ -451,113 +489,264 @@ void ULI::SliceByHalfs(ULI &a_l, ULI &a_r, unsigned n) const
     a_r.arr->RecountDigits();
 }
 
+// ULI ULI::ToomCook(const ULI &b) const
+// {
+//     ULI result(0, base);
+//     int len = b.arr->Len();
+//     if (arr->Len() > b.arr->Len()){
+//         len = arr->Len();
+//     }
+//     if (len == 1){
+//         return u * v;
+//     }
+//     ++len;
+//     len = static_cast<int>pow(3, len); // повертає 3^k, size <= 3^k
+
+//     ULI v1, v2, v3, u1, u2, u3;
+//     v1 = b.mod(len/3);
+//     u1 = mod(len/3);
+//     v2 = (v >> len/3).mod(len/3);
+//     u2 = (u >> len/3).mod(len/3);
+//     v3 = (v >> 2 * (len/3));
+//     u3 = (u >> 2 * (len/3));
+
+//     ULI arrayU[5] = {};
+//     ULI arrayV[5] = {};
+//     ULI arrayW[5] = {};
+
+//     for (int i = 0; i < 5; i++){
+//         arrayU[i] = u3 * i * i + u2 * i + u1;
+//         arrayV[i] = v3 * i * i + v2 * i + v1;
+//         arrayW[i] = ToomCook(arrayU[i], arrayV[i]);
+//     }
+
+//     ULI temp[5] = {};
+//     temp[0] = arrayW[0];
+
+//     for (int i = 1; i < 5; i++){
+//         for (int j = 0; j < 5 - i; j++){
+//             arrayW[j] = (arrayW[j + 1] - arrayW[j]) / i;
+//         }
+//         temp[i] = arrayW[0];
+//     }
+
+//     ULI W[5] = {};
+//     // реалізувати схему 18
+
+//     result = result + W[0] + W[1] << len/3 + W[2] << 2 * len/3 + W[3] << 3 * len/3 + W[4] << 4 * len/3;
+//     return result;
+// }
+
 ULI ULI::power_mod(const ULI &a, const ULI &power, const ULI &mod)
 {
     ULI result(1, a.base);
-    size_t len = power.arr->Len()+1;
+    size_t len = power.arr->Len();
     ULI *array = new ULI[len];
 
     array[0] = a;
-    for(unsigned i = 1; i < len; ++i)
-        array[i] = (array[i-1] * array[i-1]) % mod;
+    for (unsigned i = 1; i < len; ++i)
+        array[i] = (array[i - 1] * array[i - 1]) % mod;
 
-    for(unsigned i = 0; i < len; ++i)
-        if(power.arr->Get(i))
+    for (unsigned i = 0; i < len; ++i)
+        if (power.arr->Get(i))
             result = result * array[i];
 
-    delete [] array;
+    delete[] array;
     return result % mod;
 }
 
-// ULI ULI::rand(unsigned base)
-// {
-//     ULI result(time(0), base);
-//     const int a = 17;
-//     const int c = 19;
-//     result = result * a + c;
-//     return result;
-//}
+ULI ULI::random(const ULI &from, const ULI &to, const ULI &seed)
+{
+    ULI sum(0, 2);
+    ULI x = seed - 1;
+    const unsigned a = 1234567;
+    const unsigned c = 6789045;
 
-enum PRIMARY_METHODS {
-    LEMENA = 1,
-    MILLERA_RABINA = 2,
+    for (unsigned i = 0; i < 12; ++i)
+    {
+        sum = sum + x;
+        x = (x * a + c) % to;
+    }
+
+    return from + (sum - 6) % (to - from);
+}
+
+enum PRIMARY_METHODS
+{
+    MILLERA_RABINA = 1,
+    SOLOVEY_SHTRASSEN = 2,
 };
 
 bool ULI::IsPrimary(unsigned int method) const
 {
-    if(method > 4 || !method)
+    if (method > 4 || !method)
         throw "There is no such method";
-    
-    switch((PRIMARY_METHODS)method) {
-        case LEMENA:
-            return Lemena();
-        case MILLERA_RABINA:
-            return RabinMiller();
+
+    switch ((PRIMARY_METHODS)method)
+    {
+    case MILLERA_RABINA:
+        return RabinMiller();
+    case SOLOVEY_SHTRASSEN:
+        return SoloveyShtrassen();
     }
     return false;
 }
 
-bool ULI::Lemena() const
+bool ULI::lemera_test(unsigned num)
 {
-    const unsigned T = 10;
+    ULI s(4, 2);
+    ULI M = (ULI(1, 2) << num) - 1;
+    for (unsigned i = 0; i < num - 2; ++i)
+        s = ((s * s) - 2) % M;
 
-    if((*this) != 2 && IsEven())
+    if (s == 0)
+        return true;
+    else
         return false;
+}
 
-    srand((unsigned)time(NULL));
+ULI ULI::gcd(const ULI &_a, const ULI &_b)
+{
+    if (_a == 0)
+        return _b;
 
-    for(unsigned i = 0; i < T; ++i) {
-        ULI a = ULI(rand(), base) % ((*this)-1) + 2;
-        ULI power = ((*this)-1) >> 1;
-
-        ULI tmp = ULI::power_mod(a, power, (*this));
-
-        if(tmp != 1 && tmp != (*this)-1)
-            return false;
-        else if(tmp == 1 || tmp == ((*this)-1)%(*this))
-            return true;
+    ULI a = _a;
+    ULI b = _b;
+    while (b != 0)
+    {
+        ULI r;
+        if (a > b)
+            r = a % b;
+        else
+            r = b % a;
+        a = b;
+        b = r;
     }
-
-    return true;
+    return a;
 }
 
 bool ULI::RabinMiller() const
 {
-    if(*this < 3)
+    if (*this < 3)
         return true;
-    if(IsEven())
+    if (IsEven())
         return false;
 
-    ULI r = *this;
-    ULI count(0, base);
-    srand((unsigned)time(NULL)); // TODO
+    ULI m = (*this - 1) >> 1;
+    ULI t(0, base);
 
-    for(;;) {
-        r = r >> 1;
-        if(!r.IsEven())
-            break;
-        count = count + 1;
+    while (m.IsEven())
+    {
+        m = m >> 1;
+        t = t + 1;
     }
 
-    const unsigned t = 8;
-    for(unsigned i = 0; i <= t; ++i) {
-        ULI a = ULI(rand(), base) % ((*this)-1) + 2; // TODO
-        ULI y = power_mod(a, r, (*this));
+    const unsigned k = 8;
+    ULI a(time(NULL), base);
+    for (unsigned i = 0; i <= k; ++i)
+    {
+        a = ULI::random(ULI(2, base), (*this), a);
+        ULI u = ULI::power_mod(a, m, (*this));
 
-        if(y != 1 && y != (*this)-1) {
-            for(unsigned j = 0; j <= count-1; ++j) {
-                y = power_mod(y, ULI(2, base), (*this));
-                if(y == 1)
-                    return false;
+        if (u != 1)
+        {
+            for (unsigned j = 1; j < k && u != (*this) - 1; ++j)
+            {
+                u = power_mod(u, ULI(2, base), (*this));
             }
-            if(y != (*this)-1)
+            if (u != (*this) - 1)
                 return false;
         }
     }
     return true;
 }
 
+bool ULI::SoloveyShtrassen() const
+{
+    if ((*this) < 3)
+        return true;
+    if (IsEven())
+        return false;
+
+    unsigned k = 8;
+    ULI a(time(NULL), base);
+    for (unsigned i = 0; i <= k; ++i)
+    {
+        a = ULI::random(ULI(2, base), (*this), a);
+        if (ULI::gcd(a, (*this)) > 1)
+            return false;
+
+        ULI tmp = ULI::power_mod(a, ((*this) - 1) >> 1, (*this));
+        int j = ULI::jac_sym(a, (*this));
+        //printf("%s, %s, %d\n", a.ToString(), this->ToString(), j);
+
+        if (j == -1)
+        {
+            if (tmp != (*this) - 1)
+                return false;
+        }
+        else
+        {
+            if (tmp != j)
+                return false;
+        }
+    }
+    return true;
+}
+
+int ULI::jac_sym(const ULI &a, const ULI &n)
+{
+    if (a == 0)
+        return 0;
+    if (a == 1)
+        return 1;
+
+    ULI a1 = a;
+    unsigned e = 0;
+    while (a1.IsEven())
+    {
+        a1 = a1 >> 1;
+        ++e;
+    }
+    ULI tmp(a.base);
+    int s = 1;
+    if (e % 2 == 0)
+        s = 1;
+    else
+    {
+        tmp = n % ULI(8, n.base);
+        if (tmp == 1 || tmp == 7)
+            s = 1;
+        else if (tmp == 3 || tmp == 5)
+            s = -1;
+    }
+    if (n % ULI(4, a.base) == 3 && a1 % ULI(4, a.base) == 3)
+        s = -s;
+
+    ULI n1 = n % a1;
+    //printf("%s, %s, %d\n", n1.ToString(), a1.ToString(), s);
+    if (a1 == 1)
+        return s;
+    else
+        return s * ULI::jac_sym(n1, a1);
+}
+
 bool operator<=(unsigned num, const ULI &b)
 {
-    return !(b > num);
+    return ULI(num, b.base) <= b;
+}
+
+enum MULTIPLY
+{
+    KARATSUBA = 0,
+};
+
+ULI ULI::FastMul(const ULI &b, int method) const
+{
+    switch ((MULTIPLY)method)
+    {
+    case KARATSUBA:
+        return Karatsuba(b);
+    }
+    throw "There is no such fast mul method";
 }

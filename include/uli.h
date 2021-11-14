@@ -37,28 +37,37 @@ public:
     bool operator!=(unsigned int b) const;
     bool IsPrimary(unsigned int method = 1) const;
 
+    ULI FastMul(const ULI &b, int method=0) const;
+
     static ULI power_mod(const ULI &a, const ULI &power, const ULI &mod);
-    // static ULI rand(unsigned base);
+    static ULI random(const ULI &from, const ULI &to, const ULI &seed);
+    static ULI gcd(const ULI &a, const ULI &b);
+
+    // JACOBI SYMBOL
+    static int jac_sym(const ULI& a, const ULI &n);
+    // TEST LEMERA FOR MERSEN's NUMBERS
+    static bool lemera_test(unsigned num);
 
     friend bool operator<=(unsigned num, const ULI &b);
+
 private:
     bitarr *arr;
-    int base;
+    unsigned int base;
 
     ULI();
     void ParseString(const char *string, size_t len);
     void DivAndMod(const ULI &b, ULI &div, ULI &mod) const;
-    
-    // MILTIPLICATIONS METHODS
-    ULI Karatsuba(const ULI &b) const;
     void SliceByHalfs(ULI &a_l, ULI &a_r, unsigned n) const;
+    
+    // MULTIPLICATION METHODS
+    ULI Karatsuba(const ULI &b) const;
 
-    // PRIAMRY TESTS
-    bool Lemena() const;
+    // PRIMARY TESTS
     bool RabinMiller() const;
+    bool SoloveyShtrassen() const;
     
     static char *strrev(char *str);
-    static int
+    static unsigned int
     len_from_digits(unsigned int digits, unsigned int base);
 };
 
