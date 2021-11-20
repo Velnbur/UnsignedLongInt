@@ -3,13 +3,14 @@
 
 class BitArr {
 public:
+    BitArr();
     explicit BitArr(size_t len);
     BitArr(const BitArr &a);
 
     BitArr &operator=(const BitArr &a);
 
     void Set(unsigned i, char value);
-    char Get(unsigned i);
+    char Get(unsigned i) const;
     void PushBack(int value);
     size_t Len() const;
     void FromLongNum(unsigned *long_num, size_t _len, unsigned base);

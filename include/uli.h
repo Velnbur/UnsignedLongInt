@@ -7,11 +7,10 @@ class ULI {
 public:
     ULI(unsigned int base);
     ULI(const ULI &a);
-    ULI(unsigned int num, unsigned int base);
-    ULI(const char *str, size_t len, unsigned int base);
-    ~ULI();
+    explicit ULI(unsigned int num, unsigned int base);
+    ULI(const char *str, unsigned int base, size_t len=0);
 
-    char *ToString(char *str = nullptr, size_t len = 0) const;
+    void Print() const;
     bool IsEven() const;
     ULI operator+(const ULI &b) const;
     ULI operator+(unsigned int num) const;
@@ -51,7 +50,7 @@ public:
     friend bool operator<=(unsigned num, const ULI &b);
 
 private:
-    bitarr *arr;
+    bitarr arr;
     unsigned int base;
 
     ULI();
@@ -67,8 +66,6 @@ private:
     bool SoloveyShtrassen() const;
     
     static char *strrev(char *str);
-    static unsigned int
-    len_from_digits(unsigned int digits, unsigned int base);
 };
 
 typedef ULI uli;

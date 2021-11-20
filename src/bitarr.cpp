@@ -3,6 +3,9 @@
 
 #include "bitarr.h"
 
+
+#define DEFAULT_ARR_SIZE 64
+
 const unsigned char BIT_0 = 1;
 const unsigned char BIT_1 = 2;
 const unsigned char BIT_2 = 4;
@@ -16,9 +19,20 @@ BitArr::BitArr(size_t _len)
     : len(_len), last_used(0)
 {
     if (_len % 8)
-        arr_size = _len / 8 + 1;
+        arr_size = len / 8 + 1;
     else
-        arr_size = _len / 8;
+        arr_size = len / 8;
+    arr = new char[arr_size];
+    Erase();
+}
+
+BitArr::BitArr()
+    : len(DEFAULT_ARR_SIZE), last_used(0)
+{
+    if (len % 8)
+        arr_size = len / 8 + 1;
+    else
+        arr_size = len / 8;
     arr = new char[arr_size];
     Erase();
 }
@@ -43,8 +57,9 @@ BitArr::BitArr(const BitArr &a)
 BitArr &BitArr::operator=(const BitArr &a)
 {
     if(this == &a)
-        return *this; 
-    delete [] arr;
+        return *this;
+    if(arr)
+        delete [] arr;
     arr_size = a.arr_size;
     len = a.len;
     last_used = a.last_used;
@@ -56,8 +71,10 @@ BitArr &BitArr::operator=(const BitArr &a)
     return *this;
 }
 
-char BitArr::Get(unsigned i)
+char BitArr::Get(unsigned i) const
 {
+    if(i >= Len())
+        return 0;
     unsigned bit = i % 8;
     char tmp = arr[i / 8];
     int result = 0;
@@ -98,10 +115,10 @@ void BitArr::Set(unsigned i, char value)
 {
     unsigned bit = i % 8;
     if (i >= len)
-        Resize(i / 8);
+        Resize(i / 8 + 1);
 
     if(i >= last_used)
-        last_used = i;
+        last_used = i+1;
 
     if (value)
         value = 255;
@@ -160,7 +177,7 @@ size_t BitArr::Len() const
 
 void BitArr::PushBack(int value)
 {
-    Set(last_used++, value);
+    Set(last_used, value);
 }
 
 bool BitArr::is_empty(const unsigned *a, size_t len)

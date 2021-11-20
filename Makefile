@@ -1,21 +1,26 @@
+BIN_PATH=bin
+BUILD_PATH=build
+PROJECT_NAME=lab2
+SRC_PATH=src
+INCLUDE_PATH=include
+
 CXX=g++
 DEBUG=0
-CXXFLAGS=-Wall -O2 -g -I./include/ -D DEBUG=$(DEBUG)
-PROJECT_NAME=lab2
+CXXFLAGS=-Wall -O2 -g -I$(INCLUDE_PATH)/ -D DEBUG=$(DEBUG)
 
-all: dirs build run
+all: makedirs build
 
-dirs:
-	mkdir -p ./bin/ ./build/
+makedirs:
+	@mkdir -p $(BIN_PATH) $(BUILD_PATH)
 
-%.o: src/%.cpp include/%.h
-	$(CXX) $(CXXFLAGS) -c $< -o ./build/$@
+%.o: $(SRC_PATH)/%.cpp $(INCLUDE_PATH)/%.h
+	$(CXX) $(CXXFLAGS) -c $< -o $(BUILD_PATH)/$@
 
 build: uli.o bitarr.o
-	$(CXX) $(CXXFLAGS) main.cpp $(addprefix build/, $^) -o ./bin/$(PROJECT_NAME)
+	$(CXX) $(CXXFLAGS) main.cpp $(addprefix $(BUILD_PATH)/, $^) -o $(BIN_PATH)/$(PROJECT_NAME)
 
 clean:
-	rm ./build/*.o
+	@rm $(BUILD_PATH)/*.o
 
 run:
-	./bin/$(PROJECT_NAME)
+	./$(BIN_PATH)/$(PROJECT_NAME)
