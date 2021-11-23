@@ -1,8 +1,7 @@
-#include <cstring>
 #include <cstdio>
+#include <cstring>
 
 #include "bitarr.h"
-
 
 #define DEFAULT_ARR_SIZE 64
 
@@ -15,8 +14,7 @@ const unsigned char BIT_5 = 32;
 const unsigned char BIT_6 = 64;
 const unsigned char BIT_7 = 128;
 
-BitArr::BitArr(size_t _len)
-    : len(_len), last_used(0)
+BitArr::BitArr(size_t _len) : len(_len), last_used(0)
 {
     if (_len % 8)
         arr_size = len / 8 + 1;
@@ -26,8 +24,7 @@ BitArr::BitArr(size_t _len)
     Erase();
 }
 
-BitArr::BitArr()
-    : len(DEFAULT_ARR_SIZE), last_used(0)
+BitArr::BitArr() : len(DEFAULT_ARR_SIZE), last_used(0)
 {
     if (len % 8)
         arr_size = len / 8 + 1;
@@ -39,8 +36,8 @@ BitArr::BitArr()
 
 BitArr::~BitArr()
 {
-    if(arr)
-        delete [] arr;
+    if (arr)
+        delete[] arr;
 }
 
 BitArr::BitArr(const BitArr &a)
@@ -56,10 +53,10 @@ BitArr::BitArr(const BitArr &a)
 
 BitArr &BitArr::operator=(const BitArr &a)
 {
-    if(this == &a)
+    if (this == &a)
         return *this;
-    if(arr)
-        delete [] arr;
+    if (arr)
+        delete[] arr;
     arr_size = a.arr_size;
     len = a.len;
     last_used = a.last_used;
@@ -73,37 +70,37 @@ BitArr &BitArr::operator=(const BitArr &a)
 
 char BitArr::Get(unsigned i) const
 {
-    if(i >= Len())
+    if (i >= Len())
         return 0;
     unsigned bit = i % 8;
     char tmp = arr[i / 8];
     int result = 0;
     switch (bit) {
-        case 0:
-            result = tmp & BIT_0;
-            break;
-        case 1:
-            result = tmp & BIT_1;
-            break;
-        case 2:
-            result = tmp & BIT_2;
-            break;
-        case 3:
-            result = tmp & BIT_3;
-            break;
-        case 4:
-            result = tmp & BIT_4;
-            break;
-        case 5:
-            result = tmp & BIT_5;
-            break;
-        case 6:
-            result = tmp & BIT_6;
-            break;
-        case 7:
-            result = tmp & BIT_7;
-        default:
-            break;
+    case 0:
+        result = tmp & BIT_0;
+        break;
+    case 1:
+        result = tmp & BIT_1;
+        break;
+    case 2:
+        result = tmp & BIT_2;
+        break;
+    case 3:
+        result = tmp & BIT_3;
+        break;
+    case 4:
+        result = tmp & BIT_4;
+        break;
+    case 5:
+        result = tmp & BIT_5;
+        break;
+    case 6:
+        result = tmp & BIT_6;
+        break;
+    case 7:
+        result = tmp & BIT_7;
+    default:
+        break;
     }
     if (result)
         return 1;
@@ -117,40 +114,40 @@ void BitArr::Set(unsigned i, char value)
     if (i >= len)
         Resize(i / 8 + 1);
 
-    if(i >= last_used)
-        last_used = i+1;
+    if (i >= last_used)
+        last_used = i + 1;
 
     if (value)
         value = 255;
     else
         value = 0;
     switch (bit) {
-        case 0:
-            arr[i / 8] |= BIT_0 & value;
-            break;
-        case 1:
-            arr[i / 8] |= BIT_1 & value;
-            break;
-        case 2:
-            arr[i / 8] |= BIT_2 & value;
-            break;
-        case 3:
-            arr[i / 8] |= BIT_3 & value;
-            break;
-        case 4:
-            arr[i / 8] |= BIT_4 & value;
-            break;
-        case 5:
-            arr[i / 8] |= BIT_5 & value;
-            break;
-        case 6:
-            arr[i / 8] |= BIT_6 & value;
-            break;
-        case 7:
-            arr[i / 8] |= BIT_7 & value;
-            break;
-        default:
-            break;
+    case 0:
+        arr[i / 8] |= BIT_0 & value;
+        break;
+    case 1:
+        arr[i / 8] |= BIT_1 & value;
+        break;
+    case 2:
+        arr[i / 8] |= BIT_2 & value;
+        break;
+    case 3:
+        arr[i / 8] |= BIT_3 & value;
+        break;
+    case 4:
+        arr[i / 8] |= BIT_4 & value;
+        break;
+    case 5:
+        arr[i / 8] |= BIT_5 & value;
+        break;
+    case 6:
+        arr[i / 8] |= BIT_6 & value;
+        break;
+    case 7:
+        arr[i / 8] |= BIT_7 & value;
+        break;
+    default:
+        break;
     }
 }
 
@@ -164,7 +161,7 @@ void BitArr::Resize(size_t _size)
     for (size_t i = 0; i < new_size; ++i)
         tmp[i] = i < arr_size ? arr[i] : 0;
 
-    delete [] arr;
+    delete[] arr;
     arr = tmp;
     arr_size = new_size;
     len = arr_size * 8;
@@ -209,13 +206,13 @@ void BitArr::FromLongNum(unsigned *long_num, size_t _len, unsigned base)
 void BitArr::Erase()
 {
     for (size_t i = 0; i < arr_size; ++i)
-        arr[i] = 0; 
+        arr[i] = 0;
     last_used = 0;
 }
 
 void BitArr::RecountDigits()
 {
-    while(last_used && !Get(last_used-1))
+    while (last_used && !Get(last_used - 1))
         --last_used;
 }
 
@@ -223,11 +220,11 @@ void BitArr::RevertBits()
 {
     size_t _len = Len();
     char *tmp = new char[_len];
-    for(size_t i = 0; i < _len; ++i)
+    for (size_t i = 0; i < _len; ++i)
         tmp[i] = Get(i);
     Erase();
-    for(size_t i = _len; i > 0; --i)
-        PushBack(tmp[i-1]);
+    for (size_t i = _len; i > 0; --i)
+        PushBack(tmp[i - 1]);
 
     delete[] tmp;
 }

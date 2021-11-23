@@ -1,6 +1,7 @@
+#include <math.h>
 #include <stdio.h>
-#include <time.h>
 #include <string.h>
+#include <time.h>
 
 #include "uli.h"
 
@@ -171,7 +172,7 @@ void test_mod()
     puts("\nTEST MOD");
     ULI uli1("505069340036661361787556680197619398372", 10);
     ULI uli2("215323645654754756758797979", 10);
-    
+
     uli1 = (uli1 * uli1);
     printf("uli1 = ");
     uli1.Print();
@@ -228,7 +229,7 @@ void test_power_mod()
 {
     puts("\nTEST POWER MOD");
 
-    ULI uli("289376487", 10); 
+    ULI uli("289376487", 10);
     ULI power("123456", 10);
     ULI mod("123456", 10);
 
@@ -249,14 +250,14 @@ void test_power_mod()
     putchar('\n');
 }
 
- void test_rand()
+void test_rand()
 {
     puts("\nTEST RANDOM");
     ULI from(2, 10);
     ULI to(10101, 10);
     ULI x(time(NULL), 10);
 
-    for(int i = 0; i < 12; ++i) {
+    for (int i = 0; i < 12; ++i) {
         x = ULI::random(from, to, x);
         x.Print();
         putchar('\n');
@@ -276,12 +277,15 @@ void test_lemera()
 void test_miller_rabina()
 {
     puts("\nTEST MILLERA RABINA");
-    ULI uli("27634585789999", 10);
+    ULI uli("53464574643656789", 10);
 
     printf("uli = ");
     uli.Print();
     putchar('\n');
-    printf("uli is prime = %d\n", uli.IsPrimary(1));
+
+    unsigned k = 8;
+    printf("uli is prime = %d\n", uli.IsPrimary(1, k));
+    printf("with probability %f\n", 1 - pow(0.25, k));
 }
 
 void test_jac_sym()
@@ -306,13 +310,15 @@ void test_soloveya_shtrassena()
 {
     puts("\nTEST SOLOVEYA SHTRASSENA");
 
-    ULI uli("27634585789999", 10);
+    ULI uli("53464574643656789", 10);
 
     printf("uli = ");
     uli.Print();
     putchar('\n');
-    printf("uli is prime = %d\n", uli.IsPrimary(2));
-} 
+    unsigned k = 8;
+    printf("uli is prime = %d\n", uli.IsPrimary(2, k));
+    printf("with probability %f\n", 1 - pow(0.5, k));
+}
 
 int main()
 {
@@ -335,11 +341,11 @@ int main()
         // 21359761114
         test_miller_rabina();
         test_jac_sym();
-        test_soloveya_shtrassena(); 
+        test_soloveya_shtrassena();
     } catch (const char *mess) {
         printf("%s\n", mess);
         return 1;
     }
 
-    return 0;   
+    return 0;
 }

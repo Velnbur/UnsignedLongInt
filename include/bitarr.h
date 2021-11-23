@@ -2,7 +2,7 @@
 #define BITARR_H_SENTRY
 
 class BitArr {
-public:
+  public:
     BitArr();
     explicit BitArr(size_t len);
     BitArr(const BitArr &a);
@@ -16,10 +16,10 @@ public:
     void FromLongNum(unsigned *long_num, size_t _len, unsigned base);
     void RecountDigits();
     void RevertBits();
- 
+
     ~BitArr();
 
-private:
+  private:
     char *arr;
     size_t arr_size;
     size_t len;
