@@ -20,7 +20,11 @@ with different optimized methods of calculating them.
 ## Build and usage
 
 Build:
-> make
+```shell
+$ make
+```
 
 Run tests:
-> make run
+```shell
+$ make run
+```
